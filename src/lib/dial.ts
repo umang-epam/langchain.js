@@ -29,7 +29,7 @@ export function getDialContextWindow() {
   return 128_000;
 }
 
-export function createDialChatModel() {
+export function createDialChatModel(options?: { streaming?: boolean }) {
   const endpoint = requiredEnv("DIAL_URL").replace(/\/$/, "");
   const apiKey = requiredEnv("DIAL_API_KEY");
   const deployment = requiredEnv("DIAL_DEPLOYMENT");
@@ -42,6 +42,7 @@ export function createDialChatModel() {
     azureOpenAIApiDeploymentName: deployment,
     azureOpenAIApiVersion: apiVersion,
     temperature: 0.2,
+    streaming: options?.streaming ?? false,
     configuration: {
       apiKey,
       defaultHeaders: {

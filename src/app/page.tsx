@@ -42,12 +42,20 @@ export default function Home() {
         <p className="text-zinc-600 dark:text-zinc-400">
           Sends your prompt through a Next.js API route to DIAL using AzureChatOpenAI.
         </p>
-        <a
-          href="/chat"
-          className="inline-block text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-100"
-        >
-          Open agent chat
-        </a>
+        <div className="flex flex-wrap gap-4">
+          <a
+            href="/chat"
+            className="inline-block text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-100"
+          >
+            Open agent chat
+          </a>
+          <a
+            href="/stream-chat"
+            className="inline-block text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-100"
+          >
+            Open stream chat
+          </a>
+        </div>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
