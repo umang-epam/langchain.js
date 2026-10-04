@@ -13,6 +13,22 @@ function requiredEnv(name: string) {
   return value;
 }
 
+export function getDialContextWindow() {
+  const deployment = (process.env["DIAL_DEPLOYMENT"] ?? "").toLowerCase();
+
+  if (deployment.includes("gpt-4.1") || deployment.includes("gpt-4o-mini")) {
+    return 128_000;
+  }
+  if (deployment.includes("gpt-4o") || deployment.includes("gpt-4-turbo")) {
+    return 128_000;
+  }
+  if (deployment.includes("claude")) {
+    return 200_000;
+  }
+
+  return 128_000;
+}
+
 export function createDialChatModel() {
   const endpoint = requiredEnv("DIAL_URL").replace(/\/$/, "");
   const apiKey = requiredEnv("DIAL_API_KEY");
