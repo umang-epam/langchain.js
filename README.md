@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LangChain.js + EPAM DIAL
 
-## Getting Started
+Next.js app that calls EPAM DIAL through LangChain.js (`AzureChatOpenAI`).
 
-First, run the development server:
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Fill `.env.local`:
+
+| Variable | Use |
+| --- | --- |
+| `DIAL_URL` | DIAL Core base URL, no trailing slash |
+| `DIAL_API_KEY` | DIAL API key |
+| `DIAL_DEPLOYMENT` | Model or app id in DIAL |
+| `DIAL_API_VERSION` | Optional. Defaults to `2024-02-01` |
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Route | Use |
+| --- | --- |
+| [`/`](http://localhost:3000/) | Single-shot prompt. Posts `{ prompt }` to `/api/chat` and shows one completion. |
+| [`/chat`](http://localhost:3000/chat) | Buffered agent thread. Sends full history to `/api/agent` and waits for the full reply, plus usage chips. |
+| [`/stream-chat`](http://localhost:3000/stream-chat) | Streaming agent thread. Posts history to `/api/stream-chat` and appends LangChain tokens as they arrive. |
 
-## Learn More
+## API routes
 
-To learn more about Next.js, take a look at the following resources:
+| Route | Method | Use |
+| --- | --- | --- |
+| `/api/chat` | `POST` | Basic LLM call. Body: `{ prompt }`. Returns `{ text }`. Uses a system + human message, no history. |
+| `/api/agent` | `POST` | Buffered chat turn. Body: `{ messages: [{ role, content }] }`. Maps history to LangChain `SystemMessage` / `HumanMessage` / `AIMessage`, then `model.invoke()`. Returns `{ text, usage }`. |
+| `/api/stream-chat` | `POST` | Streaming chat turn. Same body as `/api/agent`. Uses `model.stream()` and SSE: `{ delta }`, then `{ usage }`, then `{ done: true }`. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Usage payload
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`usage` on agent and stream responses:
 
-## Deploy on Vercel
+- `contextMessages` — LangChain messages sent this turn
+- `contextWindowUsed` / `contextWindowLimit` / `contextWindowPct` — prompt tokens vs the model default window
+- `inputTokens` / `outputTokens` / `totalTokens` — DIAL token counts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Shared code
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [`src/lib/dial.ts`](src/lib/dial.ts) — DIAL `AzureChatOpenAI` client
+- [`src/lib/agent.ts`](src/lib/agent.ts) — history → LangChain messages and usage helpers
