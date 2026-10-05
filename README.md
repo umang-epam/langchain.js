@@ -24,6 +24,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Docker
+
+Production image uses Next.js `output: "standalone"`. Pass DIAL secrets at **run** time; they are not baked into the image.
+
+```bash
+docker build -t langchain-js .
+docker run --rm -p 3000:3000 \
+  -e DIAL_URL \
+  -e DIAL_API_KEY \
+  -e DIAL_DEPLOYMENT \
+  -e DIAL_API_VERSION=2024-02-01 \
+  langchain-js
+```
+
+Or `--env-file .env.local`.
+
 ## Pages
 
 | Route | Use |
